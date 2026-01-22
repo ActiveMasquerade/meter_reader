@@ -1,8 +1,7 @@
 import rclpy
 from rclpy.node import Node
-
+from std_msgs.msg import String
 import cv2
-import numpy
 import imutils
 from imutils.perspective import four_point_transform
 from imutils import contours
@@ -37,6 +36,7 @@ class DigitalReader(Node):
             self.callback,
             10
         )
+        self.pub = self.create_publisher(String,"meter_reading",10)
 
         self.get_logger().info("Digital reader node started")
 
@@ -127,7 +127,10 @@ class DigitalReader(Node):
             digits.append(digit)
 
         value = "{}{}{}".format(*digits)
-        self.get_logger().info(f"Meter reading: {value}")
+        
+        msg = String()
+        msg.data = str(value)
+        self.pub.publish(msg)
 
 
 def main():
