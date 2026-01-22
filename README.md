@@ -1,6 +1,8 @@
-## About
+# About:
+
+
 this is a ros application that reads digital meter (like an lcd on a thermostat) using OpenCV heuristics, It first detects if an image contains a Digital or an Analog, Currently for filtering for now, but in the future may be used to route analog meter images for reading as well
----
+
 
 ## Nodes
 
