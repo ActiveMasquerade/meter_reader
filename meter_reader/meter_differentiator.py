@@ -12,11 +12,13 @@ from cv_bridge import CvBridge
 
 def has_digital_meter_balanced_from_cv(image_gray):
 
-    if np.mean(image_gray) > 50:
-        blurred = cv2.GaussianBlur(image_gray, (5, 5), 0)
-        edged = cv2.Canny(blurred, 50, 200)
-    else:
-        edged = image_gray
+    blurred = cv2.GaussianBlur(image_gray, (5, 5), 0)
+
+    v = np.median(blurred)
+    lower = int(max(0, 0.66 * v))
+    upper = int(min(255, 1.33 * v))
+
+    edged = cv2.Canny(blurred, lower, upper)
 
     kernel = np.ones((3, 3), np.uint8)
     dilated = cv2.dilate(edged, kernel, iterations=1)
@@ -35,9 +37,9 @@ def has_digital_meter_balanced_from_cv(image_gray):
         x, y, w, h = cv2.boundingRect(c)
 
         aspect_ratio = w / float(h + 1e-6)
-        valid_height = (h > h_img * 0.05) and (h < h_img * 0.95)
+        valid_height = (h > h_img * 0.04) and (h < h_img * 0.9)
 
-        if valid_height and (0.15 < aspect_ratio < 1.2):
+        if valid_height and (0.12 < aspect_ratio < 1.5):
             digit_candidates.append((x, y, w, h))
 
     if len(digit_candidates) < 2:
@@ -52,23 +54,22 @@ def has_digital_meter_balanced_from_cv(image_gray):
         x2, y2, w2, h2 = digit_candidates[i + 1]
 
         h_diff = abs(h1 - h2)
-        similar_h = h_diff < (max(h1, h2) * 0.3)
+        similar_h = h_diff < (max(h1, h2) * 0.35)
 
         y_start = max(y1, y2)
         y_end = min(y1 + h1, y2 + h2)
         overlap_h = max(0, y_end - y_start)
 
         min_h = min(h1, h2)
-        is_aligned = overlap_h > (min_h * 0.5)
+        is_aligned = overlap_h > (min_h * 0.4)
 
         dist_x = x2 - (x1 + w1)
-        is_close = dist_x < (max(w1, w2) * 3)
+        is_close = dist_x < (max(w1, w2) * 3.5)
 
         if similar_h and is_aligned and is_close:
             pairs_found += 1
 
     return pairs_found > 0
-
 
 class MeterDifferentiator(Node):
     def __init__(self):
