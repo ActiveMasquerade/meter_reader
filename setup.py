@@ -1,5 +1,6 @@
 from setuptools import find_packages, setup
-
+from glob import glob
+import os
 package_name = 'meter_reader'
 
 setup(
@@ -7,9 +8,10 @@ setup(
     version='0.0.0',
     packages=find_packages(exclude=['test']),
     data_files=[
-        
-        ('share/' + package_name, ['package.xml']),
-    ],
+
+    ('share/meter_reader', ['package.xml']),
+    (os.path.join('share', 'meter_reader', 'launch'), glob('launch/*.launch.py')),
+],
     install_requires=['setuptools'],
     zip_safe=True,
     maintainer='root',
